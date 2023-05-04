@@ -42,6 +42,10 @@ const (
 	// KubeletPreStartContainerRPCTimeoutInSecs is the timeout duration in secs for PreStartContainer RPC
 	// Timeout duration in secs for PreStartContainer RPC
 	KubeletPreStartContainerRPCTimeoutInSecs = 30
+
+	// KubeletAllocateRPCTimeoutInSecs is the timeout duration in secs for Allocate RPC
+	// Timeout duration in secs for Allocate RPC
+	KubeletAllocateRPCTimeoutInSecs = 10
 )
 
 // SupportedVersions provides a list of supported version

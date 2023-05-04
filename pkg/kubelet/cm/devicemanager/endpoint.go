@@ -103,7 +103,9 @@ func (e *endpointImpl) allocate(devs []string) (*pluginapi.AllocateResponse, err
 	if e.isStopped() {
 		return nil, fmt.Errorf(errEndpointStopped, e)
 	}
-	return e.api.Allocate(context.Background(), &pluginapi.AllocateRequest{
+	ctx, cancel := context.WithTimeout(context.Background(), pluginapi.KubeletAllocateRPCTimeoutInSecs*time.Second)
+	defer cancel()
+	return e.api.Allocate(ctx, &pluginapi.AllocateRequest{
 		ContainerRequests: []*pluginapi.ContainerAllocateRequest{
 			{DevicesIDs: devs},
 		},
