@@ -849,7 +849,8 @@ func nodeConditions(thresholds []evictionapi.Threshold) []v1.NodeConditionType {
 	results := []v1.NodeConditionType{}
 	for _, threshold := range thresholds {
 		if nodeCondition, found := signalToNodeCondition[threshold.Signal]; found {
-			if !hasNodeCondition(results, nodeCondition) {
+			condition, _ := hasNodeCondition(results, nodeCondition)
+			if !condition {
 				results = append(results, nodeCondition)
 			}
 		}
@@ -897,13 +898,17 @@ func hasFsStatsType(inputs []fsStatsType, item fsStatsType) bool {
 }
 
 // hasNodeCondition returns true if the node condition is in the input list
-func hasNodeCondition(inputs []v1.NodeConditionType, item v1.NodeConditionType) bool {
+func hasNodeCondition(inputs []v1.NodeConditionType, item v1.NodeConditionType) (bool, bool) {
+	if len(inputs) == 0 {
+		return false, true
+	}
+
 	for _, input := range inputs {
 		if input == item {
-			return true
+			return true, true
 		}
 	}
-	return false
+	return false, true
 }
 
 // mergeThresholds will merge both threshold lists eliminating duplicates.

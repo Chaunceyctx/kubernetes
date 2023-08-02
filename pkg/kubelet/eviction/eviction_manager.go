@@ -100,6 +100,10 @@ type managerImpl struct {
 	thresholdsLastUpdated time.Time
 	// whether can support local storage capacity isolation
 	localStorageCapacityIsolation bool
+	// diskInfoProvider returns disk info of node
+	diskInfoProvider DiskInfoProvider
+	// podFunc returns active pod in node
+	podFunc ActivePodsFunc
 }
 
 // ensure it implements the required interface
@@ -149,7 +153,8 @@ func (m *managerImpl) Admit(attrs *lifecycle.PodAdmitAttributes) lifecycle.PodAd
 	}
 
 	// Conditions other than memory pressure reject all pods
-	nodeOnlyHasMemoryPressureCondition := hasNodeCondition(m.nodeConditions, v1.NodeMemoryPressure) && len(m.nodeConditions) == 1
+	condition, _ := hasNodeCondition(m.nodeConditions, v1.NodeMemoryPressure)
+	nodeOnlyHasMemoryPressureCondition := condition && len(m.nodeConditions) == 1
 	if nodeOnlyHasMemoryPressureCondition {
 		notBestEffort := v1.PodQOSBestEffort != v1qos.GetPodQOS(attrs.Pod)
 		if notBestEffort {
@@ -177,6 +182,9 @@ func (m *managerImpl) Admit(attrs *lifecycle.PodAdmitAttributes) lifecycle.PodAd
 
 // Start starts the control loop to observe and response to low compute resources.
 func (m *managerImpl) Start(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration) {
+	m.diskInfoProvider = diskInfoProvider
+	m.podFunc = podFunc
+
 	thresholdHandler := func(message string) {
 		klog.InfoS(message)
 		m.synchronize(diskInfoProvider, podFunc)
@@ -208,21 +216,22 @@ func (m *managerImpl) Start(diskInfoProvider DiskInfoProvider, podFunc ActivePod
 }
 
 // IsUnderMemoryPressure returns true if the node is under memory pressure.
-func (m *managerImpl) IsUnderMemoryPressure() bool {
+func (m *managerImpl) IsUnderMemoryPressure() (bool, bool) {
 	m.RLock()
 	defer m.RUnlock()
+	m.synchronize(m.diskInfoProvider, m.podFunc)
 	return hasNodeCondition(m.nodeConditions, v1.NodeMemoryPressure)
 }
 
 // IsUnderDiskPressure returns true if the node is under disk pressure.
-func (m *managerImpl) IsUnderDiskPressure() bool {
+func (m *managerImpl) IsUnderDiskPressure() (bool, bool) {
 	m.RLock()
 	defer m.RUnlock()
 	return hasNodeCondition(m.nodeConditions, v1.NodeDiskPressure)
 }
 
 // IsUnderPIDPressure returns true if the node is under PID pressure.
-func (m *managerImpl) IsUnderPIDPressure() bool {
+func (m *managerImpl) IsUnderPIDPressure() (bool, bool) {
 	m.RLock()
 	defer m.RUnlock()
 	return hasNodeCondition(m.nodeConditions, v1.NodePIDPressure)

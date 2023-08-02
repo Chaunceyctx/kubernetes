@@ -60,13 +60,13 @@ type Manager interface {
 	Start(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration)
 
 	// IsUnderMemoryPressure returns true if the node is under memory pressure.
-	IsUnderMemoryPressure() bool
+	IsUnderMemoryPressure() (bool, bool)
 
 	// IsUnderDiskPressure returns true if the node is under disk pressure.
-	IsUnderDiskPressure() bool
+	IsUnderDiskPressure() (bool, bool)
 
 	// IsUnderPIDPressure returns true if the node is under PID pressure.
-	IsUnderPIDPressure() bool
+	IsUnderPIDPressure() (bool, bool)
 }
 
 // DiskInfoProvider is responsible for informing the manager how disk is configured.
