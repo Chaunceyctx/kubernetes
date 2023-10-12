@@ -50,6 +50,7 @@ import (
 	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1"
 	kubelettypes "k8s.io/kubelet/pkg/types"
 	"k8s.io/kubernetes/pkg/features"
+	config "k8s.io/kubernetes/pkg/kubelet/config"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/cri/remote"
 	"k8s.io/kubernetes/pkg/kubelet/events"
@@ -1226,9 +1227,25 @@ func (m *kubeGenericRuntimeManager) removeContainerLog(ctx context.Context, cont
 	if status == nil {
 		return remote.ErrContainerStatusNil
 	}
+
+	// Remove file used for termination log
+	labeledInfo := getContainerInfoFromLabels(status.Labels)
+	containerPath, ok := status.Annotations[containerTerminationMessagePathLabel]
+	subHostPath := filepath.Join(config.DefaultKubeletPodsDirName, string(labeledInfo.PodUID), config.DefaultKubeletContainersDirName, labeledInfo.ContainerName)
+	if ok {
+		for _, mount := range status.Mounts {
+			if mount.ContainerPath == containerPath && strings.Contains(mount.HostPath, subHostPath) {
+				err := m.osInterface.Remove(mount.HostPath)
+				if err != nil {
+					klog.ErrorS(err, "failed to remove file used for termination log", "terminationMessagePath", mount.ContainerPath, "hostPath", mount.HostPath)
+				}
+				break
+			}
+		}
+	}
+
 	// Remove the legacy container log symlink.
 	// TODO(random-liu): Remove this after cluster logging supports CRI container log path.
-	labeledInfo := getContainerInfoFromLabels(status.Labels)
 	legacySymlink := legacyLogSymlink(containerID, labeledInfo.ContainerName, labeledInfo.PodName,
 		labeledInfo.PodNamespace)
 	if err := m.osInterface.Remove(legacySymlink); err != nil && !os.IsNotExist(err) {
