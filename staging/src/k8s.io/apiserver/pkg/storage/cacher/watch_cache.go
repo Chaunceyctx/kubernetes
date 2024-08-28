@@ -202,12 +202,16 @@ type watchCache struct {
 	// Requests progress notification if there are requests waiting for watch
 	// to be fresh
 	waitingUntilFresh *conditionalProgressRequester
+
+	// newFunc is a function that creates new empty object storing a object of type Type.
+	newFunc func() runtime.Object
 }
 
 func newWatchCache(
 	keyFunc func(runtime.Object) (string, error),
 	eventHandler func(*watchCacheEvent),
 	getAttrsFunc func(runtime.Object) (labels.Set, fields.Set, error),
+	newFunc func() runtime.Object,
 	versioner storage.Versioner,
 	indexers *cache.Indexers,
 	clock clock.WithTicker,
@@ -217,6 +221,7 @@ func newWatchCache(
 		capacity:            defaultLowerBoundCapacity,
 		keyFunc:             keyFunc,
 		getAttrsFunc:        getAttrsFunc,
+		newFunc:             newFunc,
 		cache:               make([]*watchCacheEvent, defaultLowerBoundCapacity),
 		lowerBoundCapacity:  defaultLowerBoundCapacity,
 		upperBoundCapacity:  defaultUpperBoundCapacity,
@@ -705,7 +710,7 @@ func (w *watchCache) isIndexValidLocked(index int) bool {
 // be called under the watchCache lock.
 func (w *watchCache) getAllEventsSinceLocked(resourceVersion uint64, opts storage.ListOptions) (*watchCacheInterval, error) {
 	if opts.SendInitialEvents != nil && *opts.SendInitialEvents {
-		return w.getIntervalFromStoreLocked()
+		return w.getIntervalFromStoreLocked(true)
 	}
 
 	size := w.endIndex - w.startIndex
@@ -734,7 +739,7 @@ func (w *watchCache) getAllEventsSinceLocked(resourceVersion uint64, opts storag
 			// current state and only then start watching from that point.
 			//
 			// TODO: In v2 api, we should stop returning the current state - #13969.
-			return w.getIntervalFromStoreLocked()
+			return w.getIntervalFromStoreLocked(false)
 		}
 		// SendInitialEvents = false and resourceVersion = 0
 		// means that the request would like to start watching
@@ -760,8 +765,8 @@ func (w *watchCache) getAllEventsSinceLocked(resourceVersion uint64, opts storag
 // getIntervalFromStoreLocked returns a watchCacheInterval
 // that covers the entire storage state.
 // This function assumes to be called under the watchCache lock.
-func (w *watchCache) getIntervalFromStoreLocked() (*watchCacheInterval, error) {
-	ci, err := newCacheIntervalFromStore(w.resourceVersion, w.store, w.getAttrsFunc)
+func (w *watchCache) getIntervalFromStoreLocked(appendBookmark bool) (*watchCacheInterval, error) {
+	ci, err := newCacheIntervalFromStore(w.resourceVersion, w.store, w.getAttrsFunc, w.newFunc, appendBookmark)
 	if err != nil {
 		return nil, err
 	}
