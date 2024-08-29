@@ -169,6 +169,34 @@ func testCheckResultFunc(t *testing.T, w watch.Interface, check func(actualEvent
 	}
 }
 
+func testCheckResultWithIgnoreFunc(t *testing.T, w watch.Interface, expectedEvents []watch.Event, ignore func(watch.Event) bool) {
+	checkIndex := 0
+	for {
+		select {
+		case event := <-w.ResultChan():
+			obj := event.Object
+			if co, ok := obj.(runtime.CacheableObject); ok {
+				event.Object = co.GetObject()
+			}
+			if ignore != nil && ignore(event) {
+				continue
+			}
+			if checkIndex < len(expectedEvents) {
+				expectNoDiff(t, "incorrect event", expectedEvents[checkIndex], event)
+				checkIndex++
+			} else {
+				t.Fatalf("cannot receive correct event, expect no event, but get a event: %+v", event)
+			}
+		case <-time.After(5 * time.Second):
+			// wait 5 seconds forcibly in order to receive all watchEvents including multiple bookmark events
+			if checkIndex < len(expectedEvents) {
+				t.Fatalf("cannot receive enough events within specific time, rest expected events: %+v", expectedEvents[checkIndex:])
+			}
+			return
+		}
+	}
+}
+
 func testCheckStop(t *testing.T, w watch.Interface) {
 	select {
 	case e, ok := <-w.ResultChan():
@@ -187,13 +215,13 @@ func testCheckStop(t *testing.T, w watch.Interface) {
 	}
 }
 
-func testCheckResultsInStrictOrder(t *testing.T, w watch.Interface, expectedEvents []watch.Event) {
+func TestCheckResultsInStrictOrder(t *testing.T, w watch.Interface, expectedEvents []watch.Event) {
 	for _, expectedEvent := range expectedEvents {
 		testCheckResult(t, w, expectedEvent)
 	}
 }
 
-func testCheckNoMoreResults(t *testing.T, w watch.Interface) {
+func TestCheckNoMoreResults(t *testing.T, w watch.Interface) {
 	select {
 	case e := <-w.ResultChan():
 		t.Errorf("Unexpected: %#v event received, expected no events", e)
