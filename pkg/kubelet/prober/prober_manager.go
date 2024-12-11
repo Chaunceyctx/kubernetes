@@ -23,10 +23,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/component-base/metrics"
 	"k8s.io/klog/v2"
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
+	"k8s.io/kubernetes/pkg/features"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/prober/results"
 	"k8s.io/kubernetes/pkg/kubelet/status"
@@ -188,38 +190,47 @@ func (m *manager) AddPod(pod *v1.Pod) {
 
 		if c.StartupProbe != nil {
 			key.probeType = startup
-			if _, ok := m.workers[key]; ok {
+			if existWorker, ok := m.workers[key]; ok {
+				if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+					existWorker.spec.Suspend = c.StartupProbe.Suspend
+				}
 				klog.V(8).ErrorS(nil, "Startup probe already exists for container",
 					"pod", klog.KObj(pod), "containerName", c.Name)
-				return
+			} else {
+				w := newWorker(m, startup, pod, c)
+				m.workers[key] = w
+				go w.run()
 			}
-			w := newWorker(m, startup, pod, c)
-			m.workers[key] = w
-			go w.run()
 		}
 
 		if c.ReadinessProbe != nil {
 			key.probeType = readiness
-			if _, ok := m.workers[key]; ok {
+			if existWorker, ok := m.workers[key]; ok {
+				if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+					existWorker.spec.Suspend = c.ReadinessProbe.Suspend
+				}
 				klog.V(8).ErrorS(nil, "Readiness probe already exists for container",
 					"pod", klog.KObj(pod), "containerName", c.Name)
-				return
+			} else {
+				w := newWorker(m, readiness, pod, c)
+				m.workers[key] = w
+				go w.run()
 			}
-			w := newWorker(m, readiness, pod, c)
-			m.workers[key] = w
-			go w.run()
 		}
 
 		if c.LivenessProbe != nil {
 			key.probeType = liveness
-			if _, ok := m.workers[key]; ok {
+			if existWorker, ok := m.workers[key]; ok {
+				if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+					existWorker.spec.Suspend = c.LivenessProbe.Suspend
+				}
 				klog.V(8).ErrorS(nil, "Liveness probe already exists for container",
 					"pod", klog.KObj(pod), "containerName", c.Name)
-				return
+			} else {
+				w := newWorker(m, liveness, pod, c)
+				m.workers[key] = w
+				go w.run()
 			}
-			w := newWorker(m, liveness, pod, c)
-			m.workers[key] = w
-			go w.run()
 		}
 	}
 }
@@ -288,6 +299,9 @@ func (m *manager) isContainerStarted(pod *v1.Pod, containerStatus *v1.ContainerS
 
 func (m *manager) UpdatePodStatus(pod *v1.Pod, podStatus *v1.PodStatus) {
 	for i, c := range podStatus.ContainerStatuses {
+		if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+			m.updateContainerProbeStatus(pod, &podStatus.ContainerStatuses[i], pod.Spec.Containers)
+		}
 		started := m.isContainerStarted(pod, &podStatus.ContainerStatuses[i])
 		podStatus.ContainerStatuses[i].Started = &started
 
@@ -317,6 +331,9 @@ func (m *manager) UpdatePodStatus(pod *v1.Pod, podStatus *v1.PodStatus) {
 	}
 
 	for i, c := range podStatus.InitContainerStatuses {
+		if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+			m.updateContainerProbeStatus(pod, &podStatus.InitContainerStatuses[i], pod.Spec.InitContainers)
+		}
 		started := m.isContainerStarted(pod, &podStatus.InitContainerStatuses[i])
 		podStatus.InitContainerStatuses[i].Started = &started
 
@@ -355,6 +372,77 @@ func (m *manager) UpdatePodStatus(pod *v1.Pod, podStatus *v1.PodStatus) {
 			}
 		}
 		podStatus.InitContainerStatuses[i].Ready = ready
+	}
+}
+
+func (m *manager) updateContainerProbeStatus(pod *v1.Pod, containerStatus *v1.ContainerStatus, containers []v1.Container) {
+	// status of startup probe
+	w, exist := m.getWorker(pod.UID, containerStatus.Name, startup)
+	if !exist {
+		configured := false
+		for _, container := range containers {
+			if container.Name == containerStatus.Name {
+				configured = container.StartupProbe != nil
+				break
+			}
+		}
+		if !configured {
+			containerStatus.StartupProbeStatus = v1.ProbeNotConfigured
+		} else {
+			containerStatus.StartupProbeStatus = v1.ProbeStopped
+		}
+	} else {
+		probeStatus := v1.ProbeRunning
+		if w.spec.Suspend {
+			probeStatus = v1.ProbeSuspended
+		}
+		containerStatus.StartupProbeStatus = probeStatus
+	}
+
+	// status of readiness probe
+	w, exist = m.getWorker(pod.UID, containerStatus.Name, readiness)
+	if !exist {
+		configured := false
+		for _, container := range containers {
+			if container.Name == containerStatus.Name {
+				configured = container.ReadinessProbe != nil
+				break
+			}
+		}
+		if !configured {
+			containerStatus.ReadinessProbeStatus = v1.ProbeNotConfigured
+		} else {
+			containerStatus.ReadinessProbeStatus = v1.ProbeStopped
+		}
+	} else {
+		probeStatus := v1.ProbeRunning
+		if w.spec.Suspend {
+			probeStatus = v1.ProbeSuspended
+		}
+		containerStatus.ReadinessProbeStatus = probeStatus
+	}
+
+	// status of liveness probe
+	w, exist = m.getWorker(pod.UID, containerStatus.Name, liveness)
+	if !exist {
+		configured := false
+		for _, container := range containers {
+			if container.Name == containerStatus.Name {
+				configured = container.LivenessProbe != nil
+				break
+			}
+		}
+		if !configured {
+			containerStatus.LivenessProbeStatus = v1.ProbeNotConfigured
+		} else {
+			containerStatus.LivenessProbeStatus = v1.ProbeStopped
+		}
+	} else {
+		probeStatus := v1.ProbeRunning
+		if w.spec.Suspend {
+			probeStatus = v1.ProbeSuspended
+		}
+		containerStatus.LivenessProbeStatus = probeStatus
 	}
 }
 

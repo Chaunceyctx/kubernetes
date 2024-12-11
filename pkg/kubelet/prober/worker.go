@@ -23,9 +23,11 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/component-base/metrics"
 	"k8s.io/klog/v2"
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
+	"k8s.io/kubernetes/pkg/features"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/prober/results"
 )
@@ -228,6 +230,10 @@ func (w *worker) doProbe(ctx context.Context) (keepGoing bool) {
 				"pod", klog.KObj(w.pod), "containerName", w.container.Name)
 			return true // Wait for more information.
 		}
+	}
+
+	if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) && w.spec.Suspend {
+		return true
 	}
 
 	if w.containerID.String() != c.ContainerID {
