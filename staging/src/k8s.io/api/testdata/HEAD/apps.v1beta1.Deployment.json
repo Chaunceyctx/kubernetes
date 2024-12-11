@@ -628,7 +628,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "readinessProbe": {
               "exec": {
@@ -661,7 +662,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "startupProbe": {
               "exec": {
@@ -694,7 +696,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "lifecycle": {
               "postStart": {
@@ -924,7 +927,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "readinessProbe": {
               "exec": {
@@ -957,7 +961,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "startupProbe": {
               "exec": {
@@ -990,7 +995,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "lifecycle": {
               "postStart": {
@@ -1220,7 +1226,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "readinessProbe": {
               "exec": {
@@ -1253,7 +1260,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "startupProbe": {
               "exec": {
@@ -1286,7 +1294,8 @@
               "periodSeconds": 4,
               "successThreshold": 5,
               "failureThreshold": 6,
-              "terminationGracePeriodSeconds": 7
+              "terminationGracePeriodSeconds": 7,
+              "suspend": true
             },
             "lifecycle": {
               "postStart": {

@@ -21753,6 +21753,30 @@ func schema_k8sio_api_core_v1_ContainerStatus(ref common.ReferenceCallback) comm
 							},
 						},
 					},
+					"livenessProbeStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LivenessProbeStatus represents the status of liveness prober worker\n\nPossible enum values:\n - `\"Running\"`\n - `\"Suspended\"`",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"Running", "Suspended"},
+						},
+					},
+					"readinessProbeStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReadinessProbeStatus represents the status of readiness prober worker\n\nPossible enum values:\n - `\"Running\"`\n - `\"Suspended\"`",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"Running", "Suspended"},
+						},
+					},
+					"startupProbeStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StartupProbeStatus represents the status of startup prober worker\n\nPossible enum values:\n - `\"Running\"`\n - `\"Suspended\"`",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"Running", "Suspended"},
+						},
+					},
 				},
 				Required: []string{"name", "ready", "restartCount", "image", "imageID"},
 			},
@@ -29213,6 +29237,13 @@ func schema_k8sio_api_core_v1_Probe(ref common.ReferenceCallback) common.OpenAPI
 							Description: "Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.",
 							Type:        []string{"integer"},
 							Format:      "int64",
+						},
+					},
+					"suspend": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Suspend indicate whether the probe worker is running. default value is false.",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},

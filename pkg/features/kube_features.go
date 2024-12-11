@@ -147,6 +147,12 @@ const (
 	// Enables container Checkpoint support in the kubelet
 	ContainerCheckpoint featuregate.Feature = "ContainerCheckpoint"
 
+	// owner: @chaunceyctx
+	// kep: https://kep.k8s.io/xxx
+	//
+	// Enables the status of prober worker(syspended or running) can be set by user manually
+	ContainerProbeSuspend featuregate.Feature = "ContainerProbeSuspend"
+
 	// owner: @helayoty
 	// kep: https://kep.k8s.io/4026
 	//

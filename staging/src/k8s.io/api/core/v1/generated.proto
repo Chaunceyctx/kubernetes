@@ -1103,6 +1103,21 @@ message ContainerStatus {
   // +listType=map
   // +listMapKey=name
   repeated ResourceStatus allocatedResourcesStatus = 14;
+
+  // LivenessProbeStatus represents the status of liveness prober worker
+  // +featureGate=ContainerProbeSuspend
+  // +optional
+  optional string livenessProbeStatus = 15;
+
+  // ReadinessProbeStatus represents the status of readiness prober worker
+  // +featureGate=ContainerProbeSuspend
+  // +optional
+  optional string readinessProbeStatus = 16;
+
+  // StartupProbeStatus represents the status of startup prober worker
+  // +featureGate=ContainerProbeSuspend
+  // +optional
+  optional string startupProbeStatus = 17;
 }
 
 // ContainerUser represents user identity information
@@ -4805,6 +4820,12 @@ message Probe {
   // Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
   // +optional
   optional int64 terminationGracePeriodSeconds = 7;
+
+  // Suspend indicate whether the probe worker is running.
+  // default value is false.
+  // +optional
+  // +optional
+  optional bool suspend = 8;
 }
 
 // ProbeHandler defines a specific action that should be taken in a probe.

@@ -5223,10 +5223,16 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.api.core.v1.ContainerState
       default: {}
+    - name: livenessProbeStatus
+      type:
+        scalar: string
     - name: name
       type:
         scalar: string
       default: ""
+    - name: readinessProbeStatus
+      type:
+        scalar: string
     - name: ready
       type:
         scalar: boolean
@@ -5241,6 +5247,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: started
       type:
         scalar: boolean
+    - name: startupProbeStatus
+      type:
+        scalar: string
     - name: state
       type:
         namedType: io.k8s.api.core.v1.ContainerState
@@ -7399,6 +7408,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: successThreshold
       type:
         scalar: numeric
+    - name: suspend
+      type:
+        scalar: boolean
     - name: tcpSocket
       type:
         namedType: io.k8s.api.core.v1.TCPSocketAction

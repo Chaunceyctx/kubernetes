@@ -3405,6 +3405,9 @@ func autoConvert_v1_ContainerStatus_To_core_ContainerStatus(in *corev1.Container
 	out.VolumeMounts = *(*[]core.VolumeMountStatus)(unsafe.Pointer(&in.VolumeMounts))
 	out.User = (*core.ContainerUser)(unsafe.Pointer(in.User))
 	out.AllocatedResourcesStatus = *(*[]core.ResourceStatus)(unsafe.Pointer(&in.AllocatedResourcesStatus))
+	out.LivenessProbeStatus = core.ProbeStatus(in.LivenessProbeStatus)
+	out.ReadinessProbeStatus = core.ProbeStatus(in.ReadinessProbeStatus)
+	out.StartupProbeStatus = core.ProbeStatus(in.StartupProbeStatus)
 	return nil
 }
 
@@ -3432,6 +3435,9 @@ func autoConvert_core_ContainerStatus_To_v1_ContainerStatus(in *core.ContainerSt
 	out.VolumeMounts = *(*[]corev1.VolumeMountStatus)(unsafe.Pointer(&in.VolumeMounts))
 	out.User = (*corev1.ContainerUser)(unsafe.Pointer(in.User))
 	out.AllocatedResourcesStatus = *(*[]corev1.ResourceStatus)(unsafe.Pointer(&in.AllocatedResourcesStatus))
+	out.LivenessProbeStatus = corev1.ProbeStatus(in.LivenessProbeStatus)
+	out.ReadinessProbeStatus = corev1.ProbeStatus(in.ReadinessProbeStatus)
+	out.StartupProbeStatus = corev1.ProbeStatus(in.StartupProbeStatus)
 	return nil
 }
 
@@ -7093,6 +7099,7 @@ func autoConvert_v1_Probe_To_core_Probe(in *corev1.Probe, out *core.Probe, s con
 	out.SuccessThreshold = in.SuccessThreshold
 	out.FailureThreshold = in.FailureThreshold
 	out.TerminationGracePeriodSeconds = (*int64)(unsafe.Pointer(in.TerminationGracePeriodSeconds))
+	out.Suspend = in.Suspend
 	return nil
 }
 
@@ -7111,6 +7118,7 @@ func autoConvert_core_Probe_To_v1_Probe(in *core.Probe, out *corev1.Probe, s con
 	out.SuccessThreshold = in.SuccessThreshold
 	out.FailureThreshold = in.FailureThreshold
 	out.TerminationGracePeriodSeconds = (*int64)(unsafe.Pointer(in.TerminationGracePeriodSeconds))
+	out.Suspend = in.Suspend
 	return nil
 }
 

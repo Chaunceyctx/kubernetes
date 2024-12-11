@@ -160,7 +160,10 @@
               }
             ]
           }
-        ]
+        ],
+        "livenessProbeStatus": "livenessProbeStatusValue",
+        "readinessProbeStatus": "readinessProbeStatusValue",
+        "startupProbeStatus": "startupProbeStatusValue"
       }
     ],
     "containerStatuses": [
@@ -252,7 +255,10 @@
               }
             ]
           }
-        ]
+        ],
+        "livenessProbeStatus": "livenessProbeStatusValue",
+        "readinessProbeStatus": "readinessProbeStatusValue",
+        "startupProbeStatus": "startupProbeStatusValue"
       }
     ],
     "qosClass": "qosClassValue",
@@ -345,7 +351,10 @@
               }
             ]
           }
-        ]
+        ],
+        "livenessProbeStatus": "livenessProbeStatusValue",
+        "readinessProbeStatus": "readinessProbeStatusValue",
+        "startupProbeStatus": "startupProbeStatusValue"
       }
     ],
     "resize": "resizeValue",

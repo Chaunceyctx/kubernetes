@@ -2399,6 +2399,10 @@ type Probe struct {
 	// This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate.
 	// +optional
 	TerminationGracePeriodSeconds *int64
+	// Suspend indicate whether the probe worker is running.
+	// default value is false.
+	// +optional
+	Suspend bool
 }
 
 // PullPolicy describes a policy for if/when to pull a container image
@@ -2833,7 +2837,33 @@ type ContainerStatus struct {
 	// +featureGate=ResourceHealthStatus
 	// +optional
 	AllocatedResourcesStatus []ResourceStatus
+
+	// LivenessProbeStatus represents the status of liveness prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	LivenessProbeStatus ProbeStatus
+
+	// ReadinessProbeStatus represents the status of readiness prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	ReadinessProbeStatus ProbeStatus
+
+	// StartupProbeStatus represents the status of startup prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	StartupProbeStatus ProbeStatus
 }
+
+// ProbeStatus describes a status of prober worker
+// +enum
+type ProbeStatus string
+
+const (
+	ProbeNotConfigured ProbeStatus = "NotConfigured"
+	ProbeSuspended     ProbeStatus = "Suspended"
+	ProbeRunning       ProbeStatus = "Running"
+	ProbeStopped       ProbeStatus = "Stopped"
+)
 
 type ResourceStatus struct {
 	// Name of the resource. Must be unique within the pod and in case of non-DRA resource, match one of the resources from the pod spec.

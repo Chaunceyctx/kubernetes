@@ -296,6 +296,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -327,6 +328,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -392,6 +394,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -512,6 +515,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -543,6 +547,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -608,6 +613,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -730,6 +736,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -761,6 +768,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue
@@ -826,6 +834,7 @@ spec:
           initialDelaySeconds: 2
           periodSeconds: 4
           successThreshold: 5
+          suspend: true
           tcpSocket:
             host: hostValue
             port: portValue

@@ -28,6 +28,7 @@ type ProbeApplyConfiguration struct {
 	SuccessThreshold               *int32 `json:"successThreshold,omitempty"`
 	FailureThreshold               *int32 `json:"failureThreshold,omitempty"`
 	TerminationGracePeriodSeconds  *int64 `json:"terminationGracePeriodSeconds,omitempty"`
+	Suspend                        *bool  `json:"suspend,omitempty"`
 }
 
 // ProbeApplyConfiguration constructs a declarative configuration of the Probe type for use with
@@ -113,5 +114,13 @@ func (b *ProbeApplyConfiguration) WithFailureThreshold(value int32) *ProbeApplyC
 // If called multiple times, the TerminationGracePeriodSeconds field is set to the value of the last call.
 func (b *ProbeApplyConfiguration) WithTerminationGracePeriodSeconds(value int64) *ProbeApplyConfiguration {
 	b.TerminationGracePeriodSeconds = &value
+	return b
+}
+
+// WithSuspend sets the Suspend field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Suspend field is set to the value of the last call.
+func (b *ProbeApplyConfiguration) WithSuspend(value bool) *ProbeApplyConfiguration {
+	b.Suspend = &value
 	return b
 }

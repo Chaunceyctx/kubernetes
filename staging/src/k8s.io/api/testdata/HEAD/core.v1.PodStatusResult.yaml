@@ -65,7 +65,9 @@ status:
       waiting:
         message: messageValue
         reason: reasonValue
+    livenessProbeStatus: livenessProbeStatusValue
     name: nameValue
+    readinessProbeStatus: readinessProbeStatusValue
     ready: true
     resources:
       claims:
@@ -77,6 +79,7 @@ status:
         requestsKey: "0"
     restartCount: 5
     started: true
+    startupProbeStatus: startupProbeStatusValue
     state:
       running:
         startedAt: "2001-01-01T01:01:01Z"
@@ -127,7 +130,9 @@ status:
       waiting:
         message: messageValue
         reason: reasonValue
+    livenessProbeStatus: livenessProbeStatusValue
     name: nameValue
+    readinessProbeStatus: readinessProbeStatusValue
     ready: true
     resources:
       claims:
@@ -139,6 +144,7 @@ status:
         requestsKey: "0"
     restartCount: 5
     started: true
+    startupProbeStatus: startupProbeStatusValue
     state:
       running:
         startedAt: "2001-01-01T01:01:01Z"
@@ -192,7 +198,9 @@ status:
       waiting:
         message: messageValue
         reason: reasonValue
+    livenessProbeStatus: livenessProbeStatusValue
     name: nameValue
+    readinessProbeStatus: readinessProbeStatusValue
     ready: true
     resources:
       claims:
@@ -204,6 +212,7 @@ status:
         requestsKey: "0"
     restartCount: 5
     started: true
+    startupProbeStatus: startupProbeStatusValue
     state:
       running:
         startedAt: "2001-01-01T01:01:01Z"

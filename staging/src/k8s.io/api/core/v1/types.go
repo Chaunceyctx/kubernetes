@@ -2600,6 +2600,10 @@ type Probe struct {
 	// Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
 	// +optional
 	TerminationGracePeriodSeconds *int64 `json:"terminationGracePeriodSeconds,omitempty" protobuf:"varint,7,opt,name=terminationGracePeriodSeconds"`
+	// Suspend indicate whether the probe worker is running.
+	// default value is false.
+	// +optional
+	Suspend bool `json:"suspend,omitempty" protobuf:"varint,8,opt,name=suspend"`
 }
 
 // PullPolicy describes a policy for if/when to pull a container image
@@ -3154,7 +3158,33 @@ type ContainerStatus struct {
 	// +listType=map
 	// +listMapKey=name
 	AllocatedResourcesStatus []ResourceStatus `json:"allocatedResourcesStatus,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,14,rep,name=allocatedResourcesStatus"`
+
+	// LivenessProbeStatus represents the status of liveness prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	LivenessProbeStatus ProbeStatus `json:"livenessProbeStatus,omitempty" protobuf:"bytes,15,opt,name=livenessProbeStatus"`
+
+	// ReadinessProbeStatus represents the status of readiness prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	ReadinessProbeStatus ProbeStatus `json:"readinessProbeStatus,omitempty" protobuf:"bytes,16,opt,name=readinessProbeStatus"`
+
+	// StartupProbeStatus represents the status of startup prober worker
+	// +featureGate=ContainerProbeSuspend
+	// +optional
+	StartupProbeStatus ProbeStatus `json:"startupProbeStatus,omitempty" protobuf:"bytes,17,opt,name=startupProbeStatus"`
 }
+
+// ProbeStatus describes a status of prober worker
+// +enum
+type ProbeStatus string
+
+const (
+	ProbeNotConfigured ProbeStatus = "NotConfigured"
+	ProbeSuspended     ProbeStatus = "Suspended"
+	ProbeRunning       ProbeStatus = "Running"
+	ProbeStopped       ProbeStatus = "Stopped"
+)
 
 // ResourceStatus represents the status of a single resource allocated to a Pod.
 type ResourceStatus struct {
