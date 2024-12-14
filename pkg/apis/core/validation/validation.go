@@ -5209,6 +5209,8 @@ func validateSeccompAnnotationsAndFieldsMatch(annotationValue string, seccompFie
 var updatablePodSpecFields = []string{
 	"`spec.containers[*].image`",
 	"`spec.initContainers[*].image`",
+	"`spec.containers[*].livenessProbe/readinessProbe/startupProbe.suspend`",
+	"`spec.initContainers[*].livenessProbe/readinessProbe/startupProbe.suspend`",
 	"`spec.activeDeadlineSeconds`",
 	"`spec.tolerations` (only additions to existing tolerations)",
 	"`spec.terminationGracePeriodSeconds` (allow it to be set to 1 if it was previously negative)",
@@ -5279,6 +5281,17 @@ func ValidatePodUpdate(newPod, oldPod *core.Pod, opts PodValidationOptions) fiel
 	var newContainers []core.Container
 	for ix, container := range mungedPodSpec.Containers {
 		container.Image = oldPod.Spec.Containers[ix].Image // +k8s:verify-mutation:reason=clone
+		if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+			if oldPod.Spec.Containers[ix].LivenessProbe != nil && container.LivenessProbe != nil {
+				container.LivenessProbe.Suspend = oldPod.Spec.Containers[ix].LivenessProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+			if oldPod.Spec.Containers[ix].ReadinessProbe != nil && container.ReadinessProbe != nil {
+				container.ReadinessProbe.Suspend = oldPod.Spec.Containers[ix].ReadinessProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+			if oldPod.Spec.Containers[ix].StartupProbe != nil && container.StartupProbe != nil {
+				container.StartupProbe.Suspend = oldPod.Spec.Containers[ix].StartupProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+		}
 		newContainers = append(newContainers, container)
 	}
 	mungedPodSpec.Containers = newContainers
@@ -5286,6 +5299,17 @@ func ValidatePodUpdate(newPod, oldPod *core.Pod, opts PodValidationOptions) fiel
 	var newInitContainers []core.Container
 	for ix, container := range mungedPodSpec.InitContainers {
 		container.Image = oldPod.Spec.InitContainers[ix].Image // +k8s:verify-mutation:reason=clone
+		if utilfeature.DefaultFeatureGate.Enabled(features.ContainerProbeSuspend) {
+			if oldPod.Spec.InitContainers[ix].LivenessProbe != nil && container.LivenessProbe != nil {
+				container.LivenessProbe.Suspend = oldPod.Spec.InitContainers[ix].LivenessProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+			if oldPod.Spec.InitContainers[ix].ReadinessProbe != nil && container.ReadinessProbe != nil {
+				container.ReadinessProbe.Suspend = oldPod.Spec.InitContainers[ix].ReadinessProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+			if oldPod.Spec.InitContainers[ix].StartupProbe != nil && container.StartupProbe != nil {
+				container.StartupProbe.Suspend = oldPod.Spec.InitContainers[ix].StartupProbe.Suspend // +k8s:verify-mutation:reason=clone
+			}
+		}
 		newInitContainers = append(newInitContainers, container)
 	}
 	mungedPodSpec.InitContainers = newInitContainers
