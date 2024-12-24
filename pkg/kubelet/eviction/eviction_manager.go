@@ -106,6 +106,8 @@ type managerImpl struct {
 	thresholdsLastUpdated time.Time
 	// whether can support local storage capacity isolation
 	localStorageCapacityIsolation bool
+	// synchronized is true if eviction manager has executed synchronize and updated node conditions once
+	synchronized bool
 }
 
 // ensure it implements the required interface
@@ -218,24 +220,57 @@ func (m *managerImpl) Start(diskInfoProvider DiskInfoProvider, podFunc ActivePod
 }
 
 // IsUnderMemoryPressure returns true if the node is under memory pressure.
-func (m *managerImpl) IsUnderMemoryPressure() bool {
+func (m *managerImpl) IsUnderMemoryPressure(node *v1.Node) bool {
 	m.RLock()
 	defer m.RUnlock()
-	return hasNodeCondition(m.nodeConditions, v1.NodeMemoryPressure)
+	if m.synchronized || node == nil {
+		return hasNodeCondition(m.nodeConditions, v1.NodeMemoryPressure)
+	}
+	for _, condition := range node.Status.Conditions {
+		if condition.Type == v1.NodeMemoryPressure {
+			if condition.Status == v1.ConditionTrue {
+				return true
+			}
+			break
+		}
+	}
+	return false
 }
 
 // IsUnderDiskPressure returns true if the node is under disk pressure.
-func (m *managerImpl) IsUnderDiskPressure() bool {
+func (m *managerImpl) IsUnderDiskPressure(node *v1.Node) bool {
 	m.RLock()
 	defer m.RUnlock()
-	return hasNodeCondition(m.nodeConditions, v1.NodeDiskPressure)
+	if m.synchronized || node == nil {
+		return hasNodeCondition(m.nodeConditions, v1.NodeDiskPressure)
+	}
+	for _, condition := range node.Status.Conditions {
+		if condition.Type == v1.NodeDiskPressure {
+			if condition.Status == v1.ConditionTrue {
+				return true
+			}
+			break
+		}
+	}
+	return false
 }
 
 // IsUnderPIDPressure returns true if the node is under PID pressure.
-func (m *managerImpl) IsUnderPIDPressure() bool {
+func (m *managerImpl) IsUnderPIDPressure(node *v1.Node) bool {
 	m.RLock()
 	defer m.RUnlock()
-	return hasNodeCondition(m.nodeConditions, v1.NodePIDPressure)
+	if m.synchronized || node == nil {
+		return hasNodeCondition(m.nodeConditions, v1.NodePIDPressure)
+	}
+	for _, condition := range node.Status.Conditions {
+		if condition.Type == v1.NodePIDPressure {
+			if condition.Status == v1.ConditionTrue {
+				return true
+			}
+			break
+		}
+	}
+	return false
 }
 
 // synchronize is the main control loop that enforces eviction thresholds.
@@ -343,6 +378,7 @@ func (m *managerImpl) synchronize(diskInfoProvider DiskInfoProvider, podFunc Act
 	// update internal state
 	m.Lock()
 	m.nodeConditions = nodeConditions
+	m.synchronized = true
 	m.thresholdsFirstObservedAt = thresholdsFirstObservedAt
 	m.nodeConditionsLastObservedAt = nodeConditionsLastObservedAt
 	m.thresholdsMet = thresholds

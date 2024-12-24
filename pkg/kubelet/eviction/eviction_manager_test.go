@@ -325,7 +325,7 @@ func TestMemoryPressure_VerifyPodStatus(t *testing.T) {
 		t.Fatalf("Manager expects no error but got %v", err)
 	}
 	// verify memory pressure is detected
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Fatalf("Manager should have detected memory pressure")
 	}
 
@@ -423,7 +423,7 @@ func TestPIDPressure_VerifyPodStatus(t *testing.T) {
 		}
 
 		// verify PID pressure is detected
-		if !manager.IsUnderPIDPressure() {
+		if !manager.IsUnderPIDPressure(nil) {
 			t.Fatalf("Manager should have detected PID pressure")
 		}
 
@@ -602,7 +602,7 @@ func TestDiskPressureNodeFs_VerifyPodStatus(t *testing.T) {
 			}
 		} else {
 			// verify manager detected disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure")
 			}
 
@@ -703,7 +703,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should not have memory pressure
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -725,7 +725,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure since soft threshold was met")
 	}
 
@@ -744,7 +744,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure since soft threshold was met")
 	}
 
@@ -773,7 +773,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should not have memory pressure
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -787,7 +787,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -819,7 +819,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure (because transition period not yet met)
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -847,7 +847,7 @@ func TestMemoryPressure(t *testing.T) {
 	}
 
 	// we should not have memory pressure (because transition period met)
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -973,7 +973,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// we should not have PID pressure
-			if manager.IsUnderPIDPressure() {
+			if manager.IsUnderPIDPressure(nil) {
 				t.Fatalf("Manager should not report PID pressure")
 			}
 
@@ -992,7 +992,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// now, we should have PID pressure
-			if !manager.IsUnderPIDPressure() {
+			if !manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should report PID pressure since soft threshold was met")
 			}
 
@@ -1011,7 +1011,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// verify PID pressure is still reported
-			if !manager.IsUnderPIDPressure() {
+			if !manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should still report PID pressure")
 			}
 
@@ -1041,7 +1041,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// verify PID pressure is resolved
-			if manager.IsUnderPIDPressure() {
+			if manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should not report PID pressure")
 			}
 
@@ -1055,7 +1055,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// verify PID pressure is reported again
-			if !manager.IsUnderPIDPressure() {
+			if !manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should report PID pressure")
 			}
 
@@ -1087,7 +1087,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// we should have PID pressure (because transition period not yet met)
-			if !manager.IsUnderPIDPressure() {
+			if !manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should report PID pressure")
 			}
 
@@ -1111,7 +1111,7 @@ func TestPIDPressure(t *testing.T) {
 			}
 
 			// we should not have PID pressure (because transition period met)
-			if manager.IsUnderPIDPressure() {
+			if manager.IsUnderPIDPressure(nil) {
 				t.Errorf("Manager should not report PID pressure")
 			}
 
@@ -1350,7 +1350,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -1377,7 +1377,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure since soft threshold was met")
 			}
 
@@ -1396,7 +1396,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure since soft threshold was met")
 			}
 
@@ -1425,7 +1425,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -1446,7 +1446,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure")
 			}
 
@@ -1475,7 +1475,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 				t.Fatalf("Manager should not have an error %v", err)
 			}
 			// we should have disk pressure (because transition period not yet met)
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure")
 			}
 
@@ -1500,7 +1500,7 @@ func TestDiskPressureNodeFs(t *testing.T) {
 			}
 
 			// we should not have disk pressure (because transition period met)
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -1582,7 +1582,7 @@ func TestMinReclaim(t *testing.T) {
 		t.Errorf("Manager should not report any errors")
 	}
 	// we should not have memory pressure
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -1596,7 +1596,7 @@ func TestMinReclaim(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -1620,7 +1620,7 @@ func TestMinReclaim(t *testing.T) {
 	}
 
 	// we should have memory pressure (because transition period not yet met)
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -1644,7 +1644,7 @@ func TestMinReclaim(t *testing.T) {
 	}
 
 	// we should have memory pressure (because transition period not yet met)
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -1664,7 +1664,7 @@ func TestMinReclaim(t *testing.T) {
 	}
 
 	// we should not have memory pressure (because transition period met)
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -1869,7 +1869,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Errorf("Manager should not report disk pressure")
 			}
 
@@ -1897,7 +1897,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure since soft threshold was met")
 			}
 
@@ -1927,7 +1927,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -1939,7 +1939,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -1957,7 +1957,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure since soft threshold was met")
 			}
 
@@ -1988,7 +1988,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -2005,7 +2005,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure")
 			}
 
@@ -2038,7 +2038,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should have disk pressure (because transition period not yet met)
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report disk pressure")
 			}
 
@@ -2064,7 +2064,7 @@ func TestNodeReclaimFuncs(t *testing.T) {
 			}
 
 			// we should not have disk pressure (because transition period met)
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report disk pressure")
 			}
 
@@ -2329,7 +2329,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report inode pressure")
 			}
 
@@ -2348,7 +2348,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report inode pressure since soft threshold was met")
 			}
 
@@ -2367,7 +2367,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report inode pressure since soft threshold was met")
 			}
 
@@ -2396,7 +2396,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should not have disk pressure
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report inode pressure")
 			}
 
@@ -2410,7 +2410,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should have disk pressure
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report inode pressure")
 			}
 
@@ -2439,7 +2439,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should have disk pressure (because transition period not yet met)
-			if !manager.IsUnderDiskPressure() {
+			if !manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should report inode pressure")
 			}
 
@@ -2464,7 +2464,7 @@ func TestInodePressureFsInodes(t *testing.T) {
 			}
 
 			// we should not have disk pressure (because transition period met)
-			if manager.IsUnderDiskPressure() {
+			if manager.IsUnderDiskPressure(nil) {
 				t.Fatalf("Manager should not report inode pressure")
 			}
 
@@ -2561,7 +2561,7 @@ func TestStaticCriticalPodsAreNotEvicted(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure since soft threshold was met")
 	}
 
@@ -2580,7 +2580,7 @@ func TestStaticCriticalPodsAreNotEvicted(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure since soft threshold was met")
 	}
 
@@ -2602,7 +2602,7 @@ func TestStaticCriticalPodsAreNotEvicted(t *testing.T) {
 	}
 
 	// we should not have memory pressure
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -2622,7 +2622,7 @@ func TestStaticCriticalPodsAreNotEvicted(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 }
@@ -2800,7 +2800,7 @@ func TestAllocatableMemoryPressure(t *testing.T) {
 	}
 
 	// we should not have memory pressure
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 
@@ -2824,7 +2824,7 @@ func TestAllocatableMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -2864,7 +2864,7 @@ func TestAllocatableMemoryPressure(t *testing.T) {
 	}
 
 	// we should have memory pressure (because transition period not yet met)
-	if !manager.IsUnderMemoryPressure() {
+	if !manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should report memory pressure")
 	}
 
@@ -2892,7 +2892,7 @@ func TestAllocatableMemoryPressure(t *testing.T) {
 	}
 
 	// we should not have memory pressure (because transition period met)
-	if manager.IsUnderMemoryPressure() {
+	if manager.IsUnderMemoryPressure(nil) {
 		t.Errorf("Manager should not report memory pressure")
 	}
 

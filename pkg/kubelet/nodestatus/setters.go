@@ -617,7 +617,7 @@ func ReadyCondition(
 
 // MemoryPressureCondition returns a Setter that updates the v1.NodeMemoryPressure condition on the node.
 func MemoryPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.Now
-	pressureFunc func() bool, // typically Kubelet.evictionManager.IsUnderMemoryPressure
+	pressureFunc func(node *v1.Node) bool, // typically Kubelet.evictionManager.IsUnderMemoryPressure
 	recordEventFunc func(eventType, event string), // typically Kubelet.recordNodeStatusEvent
 ) Setter {
 	return func(ctx context.Context, node *v1.Node) error {
@@ -653,7 +653,7 @@ func MemoryPressureCondition(nowFunc func() time.Time, // typically Kubelet.cloc
 		// condition.Status != v1.ConditionTrue or
 		// condition.Status != v1.ConditionFalse in the conditions below depending on whether
 		// the kubelet is under memory pressure or not.
-		if pressureFunc() {
+		if pressureFunc(node) {
 			if condition.Status != v1.ConditionTrue {
 				condition.Status = v1.ConditionTrue
 				condition.Reason = "KubeletHasInsufficientMemory"
@@ -678,7 +678,7 @@ func MemoryPressureCondition(nowFunc func() time.Time, // typically Kubelet.cloc
 
 // PIDPressureCondition returns a Setter that updates the v1.NodePIDPressure condition on the node.
 func PIDPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.Now
-	pressureFunc func() bool, // typically Kubelet.evictionManager.IsUnderPIDPressure
+	pressureFunc func(node *v1.Node) bool, // typically Kubelet.evictionManager.IsUnderPIDPressure
 	recordEventFunc func(eventType, event string), // typically Kubelet.recordNodeStatusEvent
 ) Setter {
 	return func(ctx context.Context, node *v1.Node) error {
@@ -714,7 +714,7 @@ func PIDPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.N
 		// condition.Status != v1.ConditionTrue or
 		// condition.Status != v1.ConditionFalse in the conditions below depending on whether
 		// the kubelet is under PID pressure or not.
-		if pressureFunc() {
+		if pressureFunc(node) {
 			if condition.Status != v1.ConditionTrue {
 				condition.Status = v1.ConditionTrue
 				condition.Reason = "KubeletHasInsufficientPID"
@@ -739,7 +739,7 @@ func PIDPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.N
 
 // DiskPressureCondition returns a Setter that updates the v1.NodeDiskPressure condition on the node.
 func DiskPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.Now
-	pressureFunc func() bool, // typically Kubelet.evictionManager.IsUnderDiskPressure
+	pressureFunc func(node *v1.Node) bool, // typically Kubelet.evictionManager.IsUnderDiskPressure
 	recordEventFunc func(eventType, event string), // typically Kubelet.recordNodeStatusEvent
 ) Setter {
 	return func(ctx context.Context, node *v1.Node) error {
@@ -775,7 +775,7 @@ func DiskPressureCondition(nowFunc func() time.Time, // typically Kubelet.clock.
 		// condition.Status != v1.ConditionTrue or
 		// condition.Status != v1.ConditionFalse in the conditions below depending on whether
 		// the kubelet is under disk pressure or not.
-		if pressureFunc() {
+		if pressureFunc(node) {
 			if condition.Status != v1.ConditionTrue {
 				condition.Status = v1.ConditionTrue
 				condition.Reason = "KubeletHasDiskPressure"
