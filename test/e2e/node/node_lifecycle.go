@@ -24,11 +24,14 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/kubernetes/test/e2e/framework"
+	e2essh "k8s.io/kubernetes/test/e2e/framework/ssh"
 	admissionapi "k8s.io/pod-security-admission/api"
 
 	"github.com/onsi/ginkgo/v2"
@@ -127,5 +130,84 @@ var _ = SIGDescribe("Node Lifecycle", func() {
 			}
 			return fmt.Errorf("node still exists: %s", fakeNode.Name)
 		}, 3*time.Minute, 5*time.Second).Should(gomega.Succeed(), "Timeout while waiting to confirm Node deletion")
+	})
+	framework.ConformanceIt("should not wipe taint on node when node is restarting", func(ctx context.Context) {
+		nodeClient := f.ClientSet.CoreV1().Nodes()
+
+		nodes, err := nodeClient.List(ctx, metav1.ListOptions{})
+		if err != nil || len(nodes.Items) == 0 {
+			framework.Logf("no nodes exist in cluster, skip this e2e test instance")
+			return
+		}
+		pickupNode := nodes.Items[0]
+		ginkgo.By(fmt.Sprintf("pick up node %s and make it under disk pressure", pickupNode.Name))
+		index := 0
+		rootDir := "/var/lib/kubelet"
+		timeout := 5 * time.Minute
+		poll := 5 * time.Second
+		err = wait.PollUntilContextTimeout(ctx, poll, timeout, true, func(ctx context.Context) (bool, error) {
+			cmd := fmt.Sprintf("dd if=/dev/zero of=%s/tmpfile-%s bs=1G count=128", rootDir, index)
+			e2essh.NodeExec(ctx, pickupNode.Name, cmd, framework.TestContext.Provider)
+			node, _ := nodeClient.Get(ctx, pickupNode.Name, metav1.GetOptions{})
+			for _, condition := range node.Status.Conditions {
+				if condition.Type == v1.NodeDiskPressure {
+					if condition.Status == v1.ConditionTrue {
+						return true, nil
+					}
+					break
+				}
+			}
+			index++
+			return false, nil
+		})
+		framework.ExpectNoError(err)
+
+		ginkgo.DeferCleanup(func(ctx context.Context) error {
+			ginkgo.By("remove all dummy files")
+			cmd := fmt.Sprintf("rm -f %s/tmpfile-*", rootDir)
+			_, err := e2essh.NodeExec(ctx, pickupNode.Name, cmd, framework.TestContext.Provider)
+			return err
+		})
+
+		ginkgo.By("start up a go routine to watch node")
+		go func() {
+			watchChan, err := nodeClient.Watch(ctx, metav1.ListOptions{Watch: true, FieldSelector: fields.OneTermNotEqualSelector("metadata.name", pickupNode.Name).String()})
+			framework.ExpectNoError(err)
+			for {
+				select {
+				case event, closed := <-watchChan.ResultChan():
+					if !closed {
+						framework.ExpectNoError(fmt.Errorf("watch stream is closed unexpectedly"))
+					}
+					node, ok := event.Object.(*v1.Node)
+					if !ok {
+						framework.ExpectNoError(fmt.Errorf("failed to get correct object type from watch channel"))
+					}
+					for _, condition := range node.Status.Conditions {
+						if condition.Type == v1.NodeDiskPressure {
+							if condition.Status == v1.ConditionTrue {
+								framework.ExpectNoError(fmt.Errorf("node taint has been wiped which is not expected"))
+							}
+						}
+					}
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+
+		ginkgo.By(fmt.Sprintf("node %s has been under disk pressure, restart it", pickupNode.Name))
+		err = wait.PollUntilContextTimeout(ctx, poll, timeout, true, func(ctx context.Context) (bool, error) {
+			cmd := fmt.Sprintf("systemctl restart kubelet")
+			result, err := e2essh.NodeExec(ctx, pickupNode.Name, cmd, framework.TestContext.Provider)
+			ok := result.Code == 0 && len(result.Stdout) == 0 && len(result.Stderr) == 0
+			if !ok || err != nil {
+				return false, nil
+			}
+			return true, nil
+		})
+		framework.ExpectNoError(err)
+
+		time.Sleep(time.Minute)
 	})
 })
