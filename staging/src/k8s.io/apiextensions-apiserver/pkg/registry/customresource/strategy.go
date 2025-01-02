@@ -143,14 +143,6 @@ func (a customResourceStrategy) GetResetFields() map[fieldpath.APIVersion]*field
 
 // PrepareForCreate clears the status of a CustomResource before creation.
 func (a customResourceStrategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-	if a.status != nil {
-		customResourceObject := obj.(*unstructured.Unstructured)
-		customResource := customResourceObject.UnstructuredContent()
-
-		// create cannot set status
-		delete(customResource, "status")
-	}
-
 	accessor, _ := meta.Accessor(obj)
 	accessor.SetGeneration(1)
 }
