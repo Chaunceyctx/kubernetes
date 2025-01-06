@@ -182,7 +182,6 @@ spec:
           failureThreshold: 5
         args:
         - -v=2
-        - -logtostderr
         - -configDir=/etc/k8s/dns/dnsmasq-nanny
         - -restartDnsmasq=true
         - --
@@ -229,7 +228,6 @@ spec:
           failureThreshold: 5
         args:
         - --v=2
-        - --logtostderr
         - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.$DNS_DOMAIN,5,SRV
         - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.$DNS_DOMAIN,5,SRV
         ports:
