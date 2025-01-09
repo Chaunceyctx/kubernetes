@@ -2833,6 +2833,18 @@ type ContainerStatus struct {
 	// +featureGate=ResourceHealthStatus
 	// +optional
 	AllocatedResourcesStatus []ResourceStatus
+	// current liveness probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	LivenessProbe *Probe
+	// current readiness probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	ReadinessProbe *Probe
+	// current startup probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	StartupProbe *Probe
 }
 
 type ResourceStatus struct {

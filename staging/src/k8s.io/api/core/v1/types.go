@@ -3154,6 +3154,18 @@ type ContainerStatus struct {
 	// +listType=map
 	// +listMapKey=name
 	AllocatedResourcesStatus []ResourceStatus `json:"allocatedResourcesStatus,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,14,rep,name=allocatedResourcesStatus"`
+	// current liveness probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	LivenessProbe *Probe
+	// current readiness probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	ReadinessProbe *Probe
+	// current startup probe configuration.
+	// +featureGate=AllowContainerProbeModification
+	// +optional
+	StartupProbe *Probe
 }
 
 // ResourceStatus represents the status of a single resource allocated to a Pod.
