@@ -692,11 +692,9 @@ func (w *watchCache) isIndexValidLocked(index int) bool {
 // getAllEventsSinceLocked returns a watchCacheInterval that can be used to
 // retrieve events since a certain resourceVersion. This function assumes to
 // be called under the watchCache lock.
-func (w *watchCache) getAllEventsSinceLocked(resourceVersion uint64, key string, opts storage.ListOptions) (*watchCacheInterval, error) {
-	_, matchesSingle := opts.Predicate.MatchesSingle()
-	matchesSingle = matchesSingle && !opts.Recursive
+func (w *watchCache) getAllEventsSinceLocked(ctx context.Context, resourceVersion uint64, key string, opts storage.ListOptions) (*watchCacheInterval, error) {
 	if opts.SendInitialEvents != nil && *opts.SendInitialEvents {
-		return w.getIntervalFromStoreLocked(key, matchesSingle)
+		return w.getIntervalFromStoreLocked(ctx, key, opts)
 	}
 
 	size := w.endIndex - w.startIndex
@@ -751,8 +749,8 @@ func (w *watchCache) getAllEventsSinceLocked(resourceVersion uint64, key string,
 // getIntervalFromStoreLocked returns a watchCacheInterval
 // that covers the entire storage state.
 // This function assumes to be called under the watchCache lock.
-func (w *watchCache) getIntervalFromStoreLocked(key string, matchesSingle bool) (*watchCacheInterval, error) {
-	ci, err := newCacheIntervalFromStore(w.resourceVersion, w.store, w.getAttrsFunc, key, matchesSingle)
+func (w *watchCache) getIntervalFromStoreLocked(ctx context.Context, key string, opts storage.ListOptions) (*watchCacheInterval, error) {
+	ci, err := newCacheIntervalFromStore(ctx, w.resourceVersion, w.store, w.getAttrsFunc, key, opts)
 	if err != nil {
 		return nil, err
 	}

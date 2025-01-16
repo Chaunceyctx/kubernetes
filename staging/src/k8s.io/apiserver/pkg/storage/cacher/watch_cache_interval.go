@@ -17,7 +17,9 @@ limitations under the License.
 package cacher
 
 import (
+	"context"
 	"fmt"
+	"k8s.io/apiserver/pkg/storage"
 	"sort"
 	"sync"
 
@@ -140,10 +142,11 @@ func (s sortableWatchCacheEvents) Swap(i, j int) {
 // returned by Next() need to be events from a List() done on the underlying store of
 // the watch cache.
 // The items returned in the interval will be sorted by Key.
-func newCacheIntervalFromStore(resourceVersion uint64, store storeIndexer, getAttrsFunc attrFunc, key string, matchesSingle bool) (*watchCacheInterval, error) {
+func newCacheIntervalFromStore(ctx context.Context, resourceVersion uint64, store storeIndexer, getAttrsFunc attrFunc, key string, opts storage.ListOptions) (*watchCacheInterval, error) {
 	buffer := &watchCacheIntervalBuffer{}
 	var allItems []interface{}
-
+	_, matchesSingle := opts.Predicate.MatchesSingle()
+	matchesSingle = matchesSingle && !opts.Recursive
 	if matchesSingle {
 		item, exists, err := store.GetByKey(key)
 		if err != nil {
@@ -154,7 +157,12 @@ func newCacheIntervalFromStore(resourceVersion uint64, store storeIndexer, getAt
 			allItems = append(allItems, item)
 		}
 	} else {
-		allItems = store.List()
+		matchValues := opts.Predicate.MatcherIndex(ctx)
+		for _, matchValue := range matchValues {
+			if result, err := store.ByIndex(matchValue.IndexName, matchValue.Value); err == nil {
+				allItems = result
+			}
+		}
 	}
 	buffer.buffer = make([]*watchCacheEvent, len(allItems))
 	for i, item := range allItems {
